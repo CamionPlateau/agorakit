@@ -1,25 +1,41 @@
 FROM php:8.3.4-apache-bookworm
 
-# Install required PHP extensions
-RUN docker-php-ext-install \
-    openssl \
-    pdo \
-    mbstring \
-    tokenizer \
-    xml \
-    ctype \
-    json \
-    bcmath \
-    imap
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+WORKDIR /var/www/html
 
-# Install MySQL/MariaDB client
-RUN apt-get update && apt-get install -y \
+USER 1000
+
+COPY . /var/www/html
+
+RUN apt-get update
+RUN apt-get upgrade
+
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+RUN apt-get install -y \
     default-mysql-client \
     mariadb-client
 
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN apt-get install -y libc-client-dev libkrb5-dev
 
-# Install Git
-RUN apt-get install -y git
+RUN yes | pecl install imap
 
+RUN docker-php-ext-enable imap
+
+RUN apt-get install zip unzip
+
+RUN composer update 
+
+#RUN composer install
+#
+## Generate a key
+#RUN php artisan key:generate
+#
+## Migrate the database
+#RUN php artisan migrate
+#
+## Link the storage public folder
+#RUN php artisan storage:link
+#
+## (Optional) Create sample content in the database
+#RUN php artisan db:seed
