@@ -1,4 +1,4 @@
-FROM php:8.3.4-apache-bookworm
+FROM carpeng/php8-3_apache-agorakit:latest
 
 WORKDIR /var/www/html
 
@@ -30,7 +30,7 @@ COPY . .
 # Use composer install instead of update to install dependencies
 # from the composer.lock file, and ignore platform reqs for PHP and ext-imap temporarily
 # This is assuming that you have tested your application with PHP 8.3.4 and the imap extension
-RUN composer update --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-req=php --ignore-platform-req=ext-imap
+RUN composer update --no-interaction --prefer-dist --optimize-autoloader
 
 # Download and configure PHPMyAdmin
 RUN apt-get update && apt-get install -y ca-certificates unzip --no-install-recommends \
