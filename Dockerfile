@@ -1,4 +1,4 @@
-FROM carpeng/php8-3_apache-agorakit:latest
+FROM php:8.2.17-apache-bookworm
 
 WORKDIR /var/www/html
 
@@ -29,7 +29,6 @@ COPY . .
 
 # Use composer install instead of update to install dependencies
 # from the composer.lock file, and ignore platform reqs for PHP and ext-imap temporarily
-# This is assuming that you have tested your application with PHP 8.3.4 and the imap extension
 RUN composer update --no-interaction --prefer-dist --optimize-autoloader
 
 # Download and configure PHPMyAdmin
@@ -47,7 +46,13 @@ ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
+# Copy and set the entrypoint script
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
 # Optional: Run as non-root user for security
 RUN usermod -u 1000 www-data && chown -R www-data:www-data /var/www
 USER www-data
 
+CMD ["apache2-foreground"]
